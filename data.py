@@ -104,7 +104,7 @@ def getIntroducedBills():
 # ============================================================================#
 	
 # --- GETS LIST OF BILLS SORTED BY DATE
-@app.route('/getBillsSortedId', methods = ['GET']
+@app.route('/getBillsSortedId', methods = ['GET'])
 def getBillsSortedId():
 	cursor.execute("SELECT * FROM legislation ORDER BY bill_id DESC");
 	
