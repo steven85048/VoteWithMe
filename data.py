@@ -15,12 +15,18 @@ password = '!sQ9XU%8I5@qw2wZ'
 driver= '{ODBC Driver 13 for SQL Server}'
 cnxn = pyodbc.connect('DRIVER='+driver+';PORT=1433;SERVER='+server+';PORT=1443;DATABASE='+database+';UID='+username+';PWD='+ password)
 
-
+# --- RUN TO RESET TABLES IN DATABASE ---
+def init():
+	cursor.execute("CREATE TABLE user_identification (email VARCHAR(20) UNIQUE, password VARCHAR(20) NOT NULL, interest VARCHAR(20),zip_district VARCHAR(20))")
+	cursor.execute("CREATE TABLE legislation (bill_id VARCHAR(20) NOT NULL UNIQUE , last_updated DATETIME, latest_action VARCHAR(20), state VARCHAR NOT NULL)")
 
 def saveBillData(data):
+	for i in data:
+		print(i);
 	cursor = cnxn.cursor()
-	cursor.execute("CREATE TABLE bill (bill_id VARCHAR(20), last_updated DATETIME, latest_action VARCHAR(20), state VARCHAR)")
+	cursor.execute("
 
+	
 # --- GETS JSON OF BILL USING ID STORED IN DB
 # --- SEND BILL ID IN POST BODY 
 # --- NOTE: SEARCH BY NUMBER BEFORE DASH IN BILL_ID: (e.g. s782-115 would be s782 as the query)
@@ -58,11 +64,10 @@ def getIntroducedBills():
 	c.perform()
 
 	data = buffer.getvalue().decode('UTF-8')
-	print(data)
 
 	# ---- GET LIST OF BILLS ----
 	jso = json.loads(data);
-	print('{' + jso['results'][0]['bills'] + '}');
+	saveBillData(jso['results'][0]['bills']);
 	
 	# HTTP response code, e.g. 200.
 	print('Status: %d' % c.getinfo(c.RESPONSE_CODE))
