@@ -4,6 +4,12 @@ Author URL: http://w3layouts.com
 License: Creative Commons Attribution 3.0 Unported
 License URL: http://creativecommons.org/licenses/by/3.0/
 --*/
+.historyheader{
+  text-align: center;
+  padding-bottom: 25px;
+  padding-top: 40px;
+  color: #B46425;
+}
 .check{
   display: inline;
   width: 25px;
@@ -790,7 +796,7 @@ background: url(../images/) no-repeat -66px 0px;
   text-align: center;
   background:#454545;
   padding:1.5em 0;
-  padding-top: 175px;
+  padding-top: 150px;
 }
 .copy p {
     color: #fff;
