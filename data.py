@@ -37,6 +37,13 @@ def printDatabaseContents():
 	
 	for row in cursor.fetchall():
 		print(row)
+		
+def shutDown():
+	# --- Commit the Connection Changes
+	cnxn.commit()
+
+	# --- Close the pycurl object
+	c.close()
 	
 # ============================================================================#
 # ============= METHODS TO CONTINUALLY UPDATE BILL DATA ======================#
@@ -111,7 +118,7 @@ def getBillsSortedId():
 # --- GETS JSON OF BILL USING ID STORED IN DB
 # --- SEND BILL ID IN POST BODY 
 # --- NOTE: SEARCH BY NUMBER BEFORE DASH IN BILL_ID: (e.g. s782-115 would be s782 as the query)
-#@app.route('/getBillById/<string:id>', methods = ['GET'])
+@app.route('/getBillById/<string:id>', methods = ['GET'])
 def getBillById(id):
 	buffer = BytesIO();
 	c.setopt(c.URL, 'https://api.propublica.org/congress/v1/115/bills/' + id)
@@ -133,7 +140,7 @@ def getBillById(id):
 
 # -- TAKES LEGISLATOR AS PARAMETER (FIRST_NAME LAST_NAME e.g. Elizabeth Warren) AND RETURNS THE JSON DATA FOR LEGISLATOR 
 # -- STORE MEMBER NAME IN POST BODY
-#app.route('/getMemberId/<string:legislator>', methods = ['GET'])
+@app.route('/getMemberId/<string:legislator>', methods = ['GET'])
 def getMemberId(legislator):
 	buffer = BytesIO();
 	
@@ -182,10 +189,6 @@ def getMemberId(legislator):
 # --- Final bill display
 #printDatabaseContents()
 
-getBillsById()
+# --- Test getBillsById
+#getBillsById()
 
-# --- Commit the Connection Changes
-cnxn.commit()
-
-# --- Close the pycurl object
-c.close()
