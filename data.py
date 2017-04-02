@@ -8,23 +8,64 @@ except ImportError:
     from StringIO import StringIO as BytesIO
 	
 # --- SETTING UP DATABASE CONNECTION AND MAINTAINING CNXN AS A GLOBAL VARIABLE ---
-server = 'votewithme.database.windows.net'
+server = 'lahacks.database.windows.net'
 database = 'votewithme'
-username = 'admin_votewithme@votewithme'
-password = '!sQ9XU%8I5@qw2wZ'
+username = 'admin_voteforme@lahacks'
+password = 'password1$'
 driver= '{ODBC Driver 13 for SQL Server}'
 cnxn = pyodbc.connect('DRIVER='+driver+';PORT=1433;SERVER='+server+';PORT=1443;DATABASE='+database+';UID='+username+';PWD='+ password)
+cursor = cnxn.cursor()
+
 
 # --- RUN TO RESET TABLES IN DATABASE ---
 def init():
-	cursor.execute("CREATE TABLE user_identification (email VARCHAR(20) UNIQUE, password VARCHAR(20) NOT NULL, interest VARCHAR(20),zip_district VARCHAR(20))")
-	cursor.execute("CREATE TABLE legislation (bill_id VARCHAR(20) NOT NULL UNIQUE , last_updated DATETIME, latest_action VARCHAR(20), state VARCHAR NOT NULL)")
+	#cursor.execute("CREATE TABLE user_identification (email VARCHAR(20) UNIQUE, password VARCHAR(20) NOT NULL, interest VARCHAR(20),zip_district VARCHAR(20))")
+	cursor.execute("CREATE TABLE legislation (bill_id VARCHAR(20) NOT NULL UNIQUE , last_updated DATE, latest_action VARCHAR(256), state VARCHAR(10) NOT NULL, level VARCHAR(30), votes_pos INT, votes_neg INT)")
 
+def printDatabaseContents():
+	cursor.execute("SELECT * FROM legislation")
+	
+	for row in cursor.fetchall():
+		print(row)
+	
+	
 def saveBillData(data):
 	for i in data:
-		print(i);
-	cursor = cnxn.cursor()
-	cursor.execute("
+		currId = i['bill_id'];
+		last_action = i['latest_major_action'];
+		state = i['active']
+		
+		# check if duplicate
+		cursor.execute("SELECT * FROM legislation WHERE bill_id = '" + currId + "'");
+		
+		# if there exists a unique entry, add into database
+		if (not cursor.fetchall()):
+			print(last_action)
+			print(currId)
+			cursor.execute("INSERT INTO legislation (bill_id, last_updated, latest_action, state) VALUES ('"+currId+"', GETDATE(),'" + last_action + "', 'true')")
+			
+def updateBillsInDatabase():
+	cursor.execute("SELECT * FROM legislation")
+	
+	buffer = BytesIO();
+	c = pycurl.Curl()
+	c.setopt(c.URL, 'https://api.propublica.org/congress/v1/115/bills/' + id)
+	c.setopt(pycurl.CAINFO, certifi.where())
+	c.setopt(c.HTTPHEADER, ['X-API-Key: 4jVRBAKrhn4nniRoSo5Gf4AWuM8DaA9G3GUC9pqN'])
+	c.setopt(c.WRITEDATA, buffer);
+	c.perform()
+
+	data = buffer.getvalue().decode('UTF-8')
+	print(data)
+	jso = json.loads(data);
+		
+	
+	# Fetches entire list of the contents of the legislation database
+	for row in cursor.fetchall():
+		print(row)
+		
+	c.close()
+		
 
 	
 # --- GETS JSON OF BILL USING ID STORED IN DB
@@ -114,4 +155,12 @@ def getMemberId(legislator):
 	# getinfo must be called before close.
 	c.close()
 
-getIntroducedBills()
+#init()
+
+# --- Run to add most recent bills ---
+#getIntroducedBills()
+
+# --- Run to update bills currently in database ---
+
+#printDatabaseContents()
+cnxn.commit()
